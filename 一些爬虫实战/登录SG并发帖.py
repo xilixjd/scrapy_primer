@@ -33,10 +33,22 @@ while True:
         shouye_html=driver.page_source
         soup1=BeautifulSoup(shouye_html,'lxml')
         tiezis=soup1.select('a.s.xst')
+        tiezeTimes = soup1.select('tbody > tr > td.by > em > span > span')
 
-        random_tie=random.randint(15,51)
+
+        random_tie=random.randint(12,45)
         tiezi='http://bbs.sgamer.com/'+tiezis[random_tie].get('href')
-        if tiezi in data_tiezi:
+        tiezeTime = tiezeTimes[random_tie].text
+
+        j = 1
+        while j <= 20:
+            if (tiezi in data_tiezi) or ('2015' in tiezeTime) or ('2014' in tiezeTime) or ('2013' in tiezeTime) or ('2012' in tiezeTime) or ('2011' in tiezeTime):
+                tiezi = 'http://bbs.sgamer.com/' + tiezis[random_tie + j].get('href')
+                tiezeTime = tiezeTimes[random_tie + j].text
+                j += 1
+            else:
+                break
+        if j == 21:
             continue
         data_tiezi.add(tiezi)
 
@@ -58,6 +70,8 @@ while True:
         driver.find_element_by_id('fastpostsubmit').click()
         i+=1
         print('第%d贴'%i)
-        time.sleep(random.randint(15,18))
+        if i >= 400:
+            exit()
+        time.sleep(random.randint(10,20))
     except:
         print('发帖失败')
