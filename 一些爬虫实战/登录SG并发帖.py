@@ -4,11 +4,14 @@ from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
 import random
+import datetime
 
 driver=webdriver.Chrome()
+driver.set_page_load_timeout(15)
 driver.get("http://bbs.sgamer.com/member.php?mod=logging&action=login")
-driver.find_element_by_name('username').send_keys('xilixjd1')
+driver.find_element_by_name('username').send_keys('react')
 driver.find_element_by_name('password').send_keys('6129216')
 # html=driver.page_source
 # soup1=BeautifulSoup(html,'lxml')
@@ -26,6 +29,12 @@ time.sleep(4)
 i=0
 data_tiezi=set()
 while True:
+    date_hour = int(datetime.datetime.now().strftime('%H'))
+    # date_min = int(datetime.datetime.now().strftime('%M'))
+    if i >150:
+        break
+    if 0 <= date_hour <= 8:
+        break
     try:
         driver.get('http://bbs.sgamer.com/forum-44-1.html')
         time.sleep(2)
@@ -59,8 +68,8 @@ while True:
         soup2=BeautifulSoup(tiezi_html,'lxml')
         titles=soup2.select('#thread_subject')
         title=titles[0].get_text()
-        # tiezi_content = soup2.select('tbody > tr > td.plc > div.pct > div > div.t_fsz > table > tbody > tr')
-        # print(tiezi_content[0])
+        # tiezi_content = soup2.select('div#postlist > div > table > tbody > tr> td.plc > div.pct > div > div.pcbs > table > tbody > tr')
+        # print(tiezi_content)
 
 
         time.sleep(3)
@@ -69,9 +78,8 @@ while True:
         time.sleep(3)
         driver.find_element_by_id('fastpostsubmit').click()
         i+=1
-        print('第%d贴'%i)
-        if i >= 400:
-            exit()
-        time.sleep(random.randint(10,20))
+        print('第%d贴'%i, title)
+        time_interval = 100
+        time.sleep(time_interval)
     except:
         print('发帖失败')
