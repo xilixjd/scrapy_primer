@@ -31,38 +31,44 @@ data_tiezi=set()
 while True:
     date_hour = int(datetime.datetime.now().strftime('%H'))
     # date_min = int(datetime.datetime.now().strftime('%M'))
-    if i >150:
-        break
-    if 0 <= date_hour <= 8:
-        break
+    # if i >150:
+    #     break
+    # if 0 <= date_hour <= 8:
+    #     break
     try:
         driver.get('http://bbs.sgamer.com/forum-44-1.html')
         time.sleep(2)
 
         shouye_html=driver.page_source
         soup1=BeautifulSoup(shouye_html,'lxml')
-        tiezis=soup1.select('a.s.xst')
-        tiezeTimes = soup1.select('tbody > tr > td.by > em > span > span')
+        tiezisHtml = soup1.select('tbody > tr')
+        tiezisHtmlCut = ""
+        for bs4Tag in tiezisHtml[21:]:
+            tiezisHtmlCut += str(bs4Tag)
 
+        tiezisHtmlCutSoup = BeautifulSoup(tiezisHtmlCut, 'lxml')
 
-        random_tie=random.randint(12,45)
-        tiezi='http://bbs.sgamer.com/'+tiezis[random_tie].get('href')
-        tiezeTime = tiezeTimes[random_tie].text
+        tiezis = tiezisHtmlCutSoup.select('tr')
+        tieziRandomInt = random.randint(0, len(tiezis))
+        tiezi = tiezis[tieziRandomInt]
+
+        random_tie = random.randint(0, len(tiezis))
+        tieziHref = 'http://bbs.sgamer.com/' + tiezi.select('a.s.xst')[0].get('href')
+        tiezeTime = tiezi.select('em > span > span')[0].text
 
         j = 1
-        while j <= 20:
-            if (tiezi in data_tiezi) or ('2015' in tiezeTime) or ('2014' in tiezeTime) or ('2013' in tiezeTime) or ('2012' in tiezeTime) or ('2011' in tiezeTime):
-                tiezi = 'http://bbs.sgamer.com/' + tiezis[random_tie + j].get('href')
-                tiezeTime = tiezeTimes[random_tie + j].text
+        while j <= len(tiezis) - tieziRandomInt:
+            if (tieziHref in data_tiezi) or ('昨天' in tiezeTime) or ('前天' in tiezeTime) or ('2016' in tiezeTime) or ('2015' in tiezeTime) or ('2014' in tiezeTime) or ('2013' in tiezeTime) or ('2012' in tiezeTime) or ('2011' in tiezeTime):
+                tieziHref = 'http://bbs.sgamer.com/' + tiezis[tieziRandomInt + j].select('a.s.xst')[0].get('href')
+                tiezeTime = tiezis[tieziRandomInt + j].select('em > span > span')[0].text
                 j += 1
             else:
                 break
-        if j == 21:
+        if j == len(tiezis) - tieziRandomInt:
             continue
-        data_tiezi.add(tiezi)
 
         time.sleep(2)
-        driver.get(tiezi)
+        driver.get(tieziHref)
         tiezi_html=driver.page_source
         time.sleep(3)
         soup2=BeautifulSoup(tiezi_html,'lxml')
@@ -78,8 +84,9 @@ while True:
         time.sleep(3)
         driver.find_element_by_id('fastpostsubmit').click()
         i+=1
-        print('第%d贴'%i, title)
-        time_interval = 100
+        print('第%d贴'%i, tiezeTime + " " + title + " " + tieziHref)
+        data_tiezi.add(tieziHref)
+        time_interval = 30
         time.sleep(time_interval)
     except:
         print('发帖失败')
